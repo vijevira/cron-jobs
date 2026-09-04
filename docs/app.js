@@ -7,7 +7,7 @@ const REPO = "cron-jobs";
 const BRANCH = "main";
 const SERVICES_PATH = "services.yml";
 const STATE_PATH = "state.json";
-const WORKFLOW_FILE = "health-check.yml";
+const WORKFLOW_FILE = "cron-jobs.yml";
 const API = "https://api.github.com";
 
 const SERVICES_HEADER = `# List every service you want monitored here.

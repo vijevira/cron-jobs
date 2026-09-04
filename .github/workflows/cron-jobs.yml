@@ -1,4 +1,4 @@
-name: Health Check Monitor
+name: Cron Jobs
 
 on:
   schedule:
