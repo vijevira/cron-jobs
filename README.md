@@ -121,6 +121,36 @@ may delay a run by several minutes. For most health-check use cases this is
 fine; if you need guaranteed sub-minute accuracy, an Action-based cron isn't
 the right tool.
 
+## Dashboard
+
+[`docs/index.html`](docs/index.html) is a static, single-page dashboard (no build step) meant to be served via
+**GitHub Pages**. It talks directly to the GitHub REST API from the browser:
+
+- **Read-only, no token needed**: current status per service, recent workflow
+  run history.
+- **With a token**: add/edit/delete services in `services.yml`, trigger a
+  manual run, and add/update/delete repo secrets (encrypted client-side with
+  libsodium before they ever leave your browser — GitHub only ever sees the
+  encrypted value). Adding a secret also auto-inserts its
+  `NAME: ${{ secrets.NAME }}` line into the workflow's env block for you.
+
+**Enable it**: Settings → Pages → Source: "Deploy from a branch" → Branch:
+`main`, folder: `/docs` → Save. It'll be live at
+`https://vijevira.github.io/cron-jobs/` a minute or two later.
+
+**To edit**, create a token at
+[github.com/settings/tokens?type=beta](https://github.com/settings/tokens?type=beta),
+scoped only to the `cron-jobs` repo, with **Contents**, **Actions**, and
+**Secrets** permissions set to Read and write. Paste it into the dashboard's
+token field — it's saved only in that browser's `localStorage` and sent only
+to `api.github.com`.
+
+Saving a service through the dashboard **regenerates the whole
+`services.yml` file** from its parsed data — the standard header comment is
+re-added automatically, but any hand-written inline comments or
+commented-out examples you'd added directly in the file will not survive a
+dashboard save.
+
 ## Actions minutes and repo visibility
 
 A 5-minute schedule runs roughly 8,600 times a month, and GitHub bills each
