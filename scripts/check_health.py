@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check configured service endpoints and email an alert on status changes."""
+import html
 import json
 import os
 import re
@@ -117,7 +118,68 @@ def check_service(service):
         return "down", str(exc)
 
 
-def send_email(subject, body):
+def build_alert_text(transitions):
+    lines = []
+    for name, _prev, new, detail in transitions:
+        label = "DOWN" if new == "down" else "RECOVERED"
+        lines.append(f"{label}: {name} - {detail}")
+    return "\n".join(lines)
+
+
+def _transition_row_html(name, new, detail):
+    is_down = new == "down"
+    label = "DOWN" if is_down else "RECOVERED"
+    bg, fg = ("#fee2e2", "#991b1b") if is_down else ("#dcfce7", "#166534")
+    return f"""
+      <tr>
+        <td style="padding:10px 14px;border-bottom:1px solid #f3f4f6;font-size:14px;color:#111827;">{html.escape(name)}</td>
+        <td style="padding:10px 14px;border-bottom:1px solid #f3f4f6;">
+          <span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;
+            font-weight:700;background:{bg};color:{fg};">{label}</span>
+        </td>
+        <td style="padding:10px 14px;border-bottom:1px solid #f3f4f6;font-size:13px;color:#4b5563;">{html.escape(detail)}</td>
+      </tr>"""
+
+
+def build_alert_html(subject, transitions):
+    rows = "".join(_transition_row_html(name, new, detail) for name, _prev, new, detail in transitions)
+    return f"""<!doctype html>
+<html>
+  <body style="margin:0;padding:24px;background:#f3f4f6;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;">
+    <table role="presentation" width="100%" style="max-width:600px;margin:0 auto;background:#ffffff;
+      border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;border-collapse:collapse;">
+      <tr>
+        <td style="padding:18px 24px;background:#111827;">
+          <span style="color:#ffffff;font-size:15px;font-weight:700;">Health Check Monitor</span>
+          <div style="color:#9ca3af;font-size:12px;margin-top:2px;">{html.escape(subject)}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:0;">
+          <table role="presentation" width="100%" style="border-collapse:collapse;">
+            <tr>
+              <th align="left" style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;
+                font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;">Service</th>
+              <th align="left" style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;
+                font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;">Status</th>
+              <th align="left" style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;
+                font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;">Detail</th>
+            </tr>
+            {rows}
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:14px 24px;font-size:11px;color:#9ca3af;">
+          Sent by the health-check-monitor scheduled workflow.
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>"""
+
+
+def send_email(subject, transitions):
     api_key = os.environ.get("MAILGUN_API_KEY")
     domain = os.environ.get("MAILGUN_DOMAIN")
     to_addr = os.environ.get("ALERT_EMAIL_TO")
@@ -134,7 +196,8 @@ def send_email(subject, body):
             "from": from_addr,
             "to": to_addr,
             "subject": subject,
-            "text": body,
+            "text": build_alert_text(transitions),
+            "html": build_alert_html(subject, transitions),
         },
         timeout=15,
     )
@@ -173,21 +236,13 @@ def main():
     save_state(current_state)
 
     if transitions:
-        lines = []
-        newly_down = []
-        for name, prev, new, detail in transitions:
-            if new == "down":
-                lines.append(f"DOWN: {name} - {detail}")
-                newly_down.append(name)
-            else:
-                lines.append(f"RECOVERED: {name} - {detail}")
-
+        newly_down = [name for name, _prev, new, _detail in transitions if new == "down"]
         subject = (
             f"[ALERT] {len(newly_down)} service(s) down"
             if newly_down
             else "[RESOLVED] All services recovered"
         )
-        send_email(subject, "\n".join(lines))
+        send_email(subject, transitions)
 
     return 1 if any_down else 0
 
