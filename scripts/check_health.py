@@ -214,7 +214,6 @@ def main():
     previous_state = load_state()
     current_state = {}
     transitions = []
-    any_down = False
 
     for service in services:
         name = service["name"]
@@ -224,8 +223,6 @@ def main():
             "detail": detail,
             "last_checked": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
-        if status == "down":
-            any_down = True
 
         prev_status = previous_state.get(name, {}).get("status")
         if prev_status != status:
@@ -244,7 +241,7 @@ def main():
         )
         send_email(subject, transitions)
 
-    return 1 if any_down else 0
+    return 0
 
 
 if __name__ == "__main__":

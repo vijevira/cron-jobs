@@ -16,8 +16,9 @@ service goes down or recovers — no spam on every run.
   get a small history of uptime/downtime transitions in `git log`.
 - An email is sent through the [Mailgun HTTP API](https://documentation.mailgun.com/) only when a service's
   status *changes* (up → down or down → up) — not on every 5-minute run.
-- If any service is currently down, the workflow run itself is marked
-  failed, so you also get GitHub's own run-failure signal/notifications.
+- The workflow run itself always completes as successful, even when a
+  service is down — email is the only alerting signal, so the Actions
+  history doesn't fill up with red X's for a known, ongoing outage.
 
 ## Setup
 
