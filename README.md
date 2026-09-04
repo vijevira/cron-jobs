@@ -31,6 +31,10 @@ service goes down or recovers — no spam on every run.
        timeout: 10
    ```
 
+   `expected_status` can be a single code, a list of acceptable codes (e.g.
+   `[200, 202, 204]`), or omitted entirely to accept any 2xx response as
+   success.
+
 2. **Add repo secrets** (Settings → Secrets and variables → Actions):
 
    | Secret              | Required | Description                                              |

@@ -2,7 +2,9 @@
 # - name: short label used in logs, state.json, and alert emails
 # - url: the health-check endpoint to call
 # - method: HTTP method, defaults to GET (set POST for check-endpoints that require it)
-# - expected_status: HTTP status code that counts as "healthy" (default 200)
+# - expected_status: HTTP status code(s) that count as "healthy". Can be a
+#     single code (e.g. 200), a list (e.g. [200, 202, 204]), or omitted
+#     entirely to accept any 2xx response as success.
 # - timeout: seconds to wait before treating the request as failed (default 10)
 # - headers: optional dict of request headers
 # - body: optional dict, sent as JSON (only meaningful for POST/PUT/etc)
@@ -25,6 +27,16 @@ services:
 
   - name: Watchtower worker
     url: https://api.watchtower.endra.in/api/worker/run
+    method: POST
+    expected_status: 202
+    timeout: 60
+    headers:
+      x-worker-secret: "${WATCHTOWER_WORKER_SECRET}"
+    body:
+      ping: true
+  
+  - name: Arcade server health check 
+    url: https://api.arcade.endra.in/health
     expected_status: 200
     timeout: 60
 

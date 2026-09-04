@@ -64,10 +64,20 @@ def save_state(state):
         f.write("\n")
 
 
+def status_ok(status_code, expected_status):
+    """expected_status may be: omitted (any 2xx is success), a single code,
+    or a list of acceptable codes."""
+    if expected_status is None:
+        return 200 <= status_code < 300, "2xx"
+    if isinstance(expected_status, list):
+        return status_code in expected_status, f"one of {expected_status}"
+    return status_code == expected_status, str(expected_status)
+
+
 def check_service(service):
     url = service["url"]
     method = service.get("method", "GET").upper()
-    expected_status = service.get("expected_status", 200)
+    expected_status = service.get("expected_status")
     timeout = service.get("timeout", 10)
 
     try:
@@ -93,9 +103,10 @@ def check_service(service):
             auth=auth,
             timeout=timeout,
         )
-        if resp.status_code == expected_status:
+        ok, label = status_ok(resp.status_code, expected_status)
+        if ok:
             return "up", f"HTTP {resp.status_code}"
-        return "down", f"expected HTTP {expected_status}, got HTTP {resp.status_code}"
+        return "down", f"expected {label}, got HTTP {resp.status_code}"
     except requests.RequestException as exc:
         return "down", str(exc)
 
