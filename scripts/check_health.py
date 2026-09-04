@@ -16,6 +16,12 @@ STATE_FILE = ROOT / "state.json"
 
 SECRET_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
+# Some WAFs/CDNs block the default "python-requests/x.x" user agent as a bot
+# signature. A per-service `headers` entry for User-Agent still overrides this.
+DEFAULT_HEADERS = {
+    "User-Agent": "health-check-monitor/1.0 (+https://github.com/vijevira/cron-jobs)"
+}
+
 
 def resolve_secrets(value):
     """Recursively replace ${ENV_VAR} placeholders with environment values.
@@ -81,7 +87,7 @@ def check_service(service):
     timeout = service.get("timeout", 10)
 
     try:
-        headers = resolve_secrets(service.get("headers", {}))
+        headers = {**DEFAULT_HEADERS, **resolve_secrets(service.get("headers", {}))}
         body = resolve_secrets(service.get("body"))
 
         auth = None
