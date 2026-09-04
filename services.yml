@@ -35,21 +35,21 @@ services:
   
   - name: Arcade server health check
     url: https://api.arcade.endra.in/health
-    timeout: 60
+    timeout: 30
 
   - name: Chhakkadi health check
     url: https://api.chhakkadi.endra.in/health
-    timeout: 60
+    timeout: 30
 
   - name: Zyvora health check
     url: https://api.zyvora.endra.in/health
-    timeout: 60
+    timeout: 30
 
   # POST endpoint with a bearer token from a repo secret:
   # - name: Internal Admin API
   #   url: https://internal.example.com/health
   #   method: POST
-  #   expected_status: 200
+  #   expected_status: [200, 201, 204]
   #   headers:
   #     Authorization: "Bearer ${INTERNAL_API_TOKEN}"
   #   body:
