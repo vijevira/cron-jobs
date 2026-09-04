@@ -17,10 +17,15 @@ STATE_FILE = ROOT / "state.json"
 
 SECRET_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
-# Some WAFs/CDNs block the default "python-requests/x.x" user agent as a bot
-# signature. A per-service `headers` entry for User-Agent still overrides this.
+# Some WAFs/CDNs block the default "python-requests/x.x" user agent, or any
+# user agent that identifies itself as a bot/script, as a bot signature. A
+# standard browser UA bypasses that basic check. A per-service `headers`
+# entry for User-Agent still overrides this.
 DEFAULT_HEADERS = {
-    "User-Agent": "health-check-monitor/1.0 (+https://github.com/vijevira/cron-jobs)"
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    )
 }
 
 
