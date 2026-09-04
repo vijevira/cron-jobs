@@ -1,0 +1,21 @@
+# List every service you want monitored here.
+# - name: short label used in logs, state.json, and alert emails
+# - url: the health-check endpoint to GET
+# - expected_status: HTTP status code that counts as "healthy" (default 200)
+# - timeout: seconds to wait before treating the request as failed (default 10)
+
+services:
+  - name: Example Service
+    url: https://example.com/health
+    expected_status: 200
+    timeout: 10
+
+  # - name: WatchTower API
+  #   url: https://api.watchtower.endra.in/health
+  #   expected_status: 200
+  #   timeout: 10
+
+  # - name: My-Site
+  #   url: https://mysite.example.com/api/health
+  #   expected_status: 200
+  #   timeout: 10
