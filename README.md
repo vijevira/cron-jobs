@@ -120,3 +120,29 @@ GitHub Actions `schedule` cron triggers are best-effort — under load, GitHub
 may delay a run by several minutes. For most health-check use cases this is
 fine; if you need guaranteed sub-minute accuracy, an Action-based cron isn't
 the right tool.
+
+## Actions minutes and repo visibility
+
+A 5-minute schedule runs roughly 8,600 times a month, and GitHub bills each
+job in whole-minute increments — so this easily uses **8,000+ Actions
+minutes/month**.
+
+- **Public repos**: Actions minutes on standard runners are free/unlimited
+  (subject to fair-use limits, a 6-hour per-job cap, and a 20-concurrent-job
+  cap on the Free plan). This repo is meant to be public for that reason.
+- **Private repos** only get 2,000 free minutes/month on the GitHub Free
+  plan — a 5-minute schedule would blow past that. If you ever make this
+  repo private, either raise the cron interval to ~30+ minutes or be ready
+  to pay for the extra minutes.
+
+## Why there's a heartbeat commit
+
+GitHub automatically disables a scheduled workflow after **60 days with no
+repository activity** (commits/pushes). Since `state.json` is only committed
+when a service's status *changes*, a repo where every service stays healthy
+for two straight months would go quiet and its schedule would silently stop
+firing. To prevent that, the `Commit updated state` step in
+[`health-check.yml`](.github/workflows/health-check.yml) pushes an empty
+`chore: heartbeat...` commit whenever 7+ days have passed since the last
+commit — well inside the 60-day window, with margin for a few failed or
+skipped runs.
