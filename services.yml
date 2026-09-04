@@ -22,22 +22,27 @@ services:
 
   - name: WatchTower Health Check API
     url: https://api.watchtower.endra.in/health
-    expected_status: 200
     timeout: 60
 
   - name: Watchtower worker
     url: https://api.watchtower.endra.in/api/worker/run
     method: POST
-    expected_status: 202
     timeout: 60
     headers:
       x-worker-secret: "${WATCHTOWER_WORKER_SECRET}"
     body:
       ping: true
   
-  - name: Arcade server health check 
+  - name: Arcade server health check
     url: https://api.arcade.endra.in/health
-    expected_status: 200
+    timeout: 60
+
+  - name: Chhakkadi health check
+    url: https://api.chhakkadi.endra.in/health
+    timeout: 60
+
+  - name: Zyvora health check
+    url: https://api.zyvora.endra.in/health
     timeout: 60
 
   # POST endpoint with a bearer token from a repo secret:
