@@ -2,6 +2,7 @@
 """Check configured service endpoints and email an alert on status changes."""
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -12,6 +13,36 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 SERVICES_FILE = ROOT / "services.yml"
 STATE_FILE = ROOT / "state.json"
+
+SECRET_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+
+
+def resolve_secrets(value):
+    """Recursively replace ${ENV_VAR} placeholders with environment values.
+
+    Lets services.yml reference credentials (auth headers, tokens, basic
+    auth) by name without ever committing the real secret to the repo. The
+    actual value must be provided as a GitHub secret and mapped into the
+    workflow's env block.
+    """
+    if isinstance(value, str):
+        def replace(match):
+            var_name = match.group(1)
+            resolved = os.environ.get(var_name)
+            if resolved is None:
+                raise ValueError(
+                    f"services.yml references ${{{var_name}}} but no environment "
+                    f"variable {var_name} is set (add it as a repo secret and map "
+                    f"it in the workflow's env block)"
+                )
+            return resolved
+
+        return SECRET_PATTERN.sub(replace, value)
+    if isinstance(value, dict):
+        return {k: resolve_secrets(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [resolve_secrets(v) for v in value]
+    return value
 
 
 def load_services():
@@ -35,10 +66,33 @@ def save_state(state):
 
 def check_service(service):
     url = service["url"]
+    method = service.get("method", "GET").upper()
     expected_status = service.get("expected_status", 200)
     timeout = service.get("timeout", 10)
+
     try:
-        resp = requests.get(url, timeout=timeout)
+        headers = resolve_secrets(service.get("headers", {}))
+        body = resolve_secrets(service.get("body"))
+
+        auth = None
+        auth_config = service.get("auth")
+        if auth_config and auth_config.get("type") == "basic":
+            auth = (
+                resolve_secrets(auth_config["username"]),
+                resolve_secrets(auth_config["password"]),
+            )
+    except ValueError as exc:
+        return "down", str(exc)
+
+    try:
+        resp = requests.request(
+            method,
+            url,
+            headers=headers or None,
+            json=body,
+            auth=auth,
+            timeout=timeout,
+        )
         if resp.status_code == expected_status:
             return "up", f"HTTP {resp.status_code}"
         return "down", f"expected HTTP {expected_status}, got HTTP {resp.status_code}"

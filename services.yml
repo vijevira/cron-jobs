@@ -1,21 +1,48 @@
 # List every service you want monitored here.
 # - name: short label used in logs, state.json, and alert emails
-# - url: the health-check endpoint to GET
+# - url: the health-check endpoint to call
+# - method: HTTP method, defaults to GET (set POST for check-endpoints that require it)
 # - expected_status: HTTP status code that counts as "healthy" (default 200)
 # - timeout: seconds to wait before treating the request as failed (default 10)
+# - headers: optional dict of request headers
+# - body: optional dict, sent as JSON (only meaningful for POST/PUT/etc)
+# - auth: optional basic-auth block: { type: basic, username: ..., password: ... }
+#
+# NEVER put real credentials directly in this file — it's committed to git.
+# Instead reference an env var with ${VAR_NAME}, add the real value as a repo
+# secret, and map it into the workflow's `env:` block (see README.md).
 
 services:
-  - name: Example Service
-    url: https://example.com/health
+  # - name: Example Service
+  #   url: https://example.com/health
+  #   expected_status: 200
+  #   timeout: 10
+
+  - name: WatchTower Health Check API
+    url: https://api.watchtower.endra.in/health
     expected_status: 200
-    timeout: 10
+    timeout: 60
 
-  # - name: WatchTower API
-  #   url: https://api.watchtower.endra.in/health
-  #   expected_status: 200
-  #   timeout: 10
+  - name: Watchtower worker
+    url: https://api.watchtower.endra.in/api/worker/run
+    expected_status: 200
+    timeout: 60
 
-  # - name: My-Site
-  #   url: https://mysite.example.com/api/health
+  # POST endpoint with a bearer token from a repo secret:
+  # - name: Internal Admin API
+  #   url: https://internal.example.com/health
+  #   method: POST
   #   expected_status: 200
-  #   timeout: 10
+  #   headers:
+  #     Authorization: "Bearer ${INTERNAL_API_TOKEN}"
+  #   body:
+  #     ping: true
+
+  # Endpoint protected by HTTP basic auth from repo secrets:
+  # - name: Protected Service
+  #   url: https://protected.example.com/health
+  #   expected_status: 200
+  #   auth:
+  #     type: basic
+  #     username: "${PROTECTED_SERVICE_USER}"
+  #     password: "${PROTECTED_SERVICE_PASS}"

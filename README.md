@@ -51,6 +51,58 @@ service goes down or recovers — no spam on every run.
 4. Optionally trigger a manual run from the Actions tab (`workflow_dispatch`)
    to verify everything before waiting for the schedule.
 
+## Services that need credentials or a POST request
+
+Some health-check endpoints require an auth token, basic auth, or a POST with
+a body. `services.yml` supports this, but **never write the actual
+credential value into `services.yml`** — it's committed to git. Instead:
+
+1. In `services.yml`, reference a placeholder with `${VAR_NAME}`:
+
+   ```yaml
+   - name: Internal Admin API
+     url: https://internal.example.com/health
+     method: POST
+     expected_status: 200
+     headers:
+       Authorization: "Bearer ${INTERNAL_API_TOKEN}"
+     body:
+       ping: true
+
+   - name: Protected Service
+     url: https://protected.example.com/health
+     expected_status: 200
+     auth:
+       type: basic
+       username: "${PROTECTED_SERVICE_USER}"
+       password: "${PROTECTED_SERVICE_PASS}"
+   ```
+
+2. Add the real value as a repo secret (Settings → Secrets and variables →
+   Actions), e.g. `INTERNAL_API_TOKEN`.
+
+3. Map it into the `Run health checks` step's `env:` block in
+   [`health-check.yml`](.github/workflows/health-check.yml):
+
+   ```yaml
+   INTERNAL_API_TOKEN: ${{ secrets.INTERNAL_API_TOKEN }}
+   ```
+
+Since the value flows through `secrets.*` into an env var, GitHub Actions
+automatically redacts it from the workflow logs if it ever appears in output.
+If `services.yml` references a `${VAR_NAME}` that isn't set, that service is
+reported as `down` with a clear error instead of silently sending the literal
+placeholder string.
+
+Supported per-service fields beyond `name`/`url`/`expected_status`/`timeout`:
+
+| Field     | Purpose                                                         |
+| --------- | ---------------------------------------------------------------- |
+| `method`  | HTTP method, defaults to `GET`                                   |
+| `headers` | dict of request headers, values may use `${VAR_NAME}`            |
+| `body`    | dict sent as JSON (for POST/PUT/etc.)                             |
+| `auth`    | `{ type: basic, username: ${VAR}, password: ${VAR} }`             |
+
 ## Switching to Maileroo instead of Mailgun
 
 The email logic lives entirely in `send_email()` in
