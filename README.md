@@ -117,10 +117,42 @@ the secret names/workflow env accordingly.
 
 ## Notes on schedule accuracy
 
-GitHub Actions `schedule` cron triggers are best-effort — under load, GitHub
-may delay a run by several minutes. For most health-check use cases this is
-fine; if you need guaranteed sub-minute accuracy, an Action-based cron isn't
-the right tool.
+GitHub Actions `schedule` cron triggers are best-effort, and in practice the
+gap can be much larger than the configured interval — this repo is set to
+`*/5 * * * *` but has actually been observed running roughly **every ~2
+hours**, not every 5 minutes. This isn't a config bug on our side; GitHub
+does not reliably honor sub-hour `schedule` intervals for public/free-tier
+repos, and appears to silently drop most ticks under system load rather than
+running them all with delay.
+
+If you ever need closer to the configured cadence, the fix isn't tuning the
+cron expression further — it's bypassing GitHub's `schedule` trigger
+entirely and having an external cron service (e.g. cron-job.org) call the
+`workflow_dispatch` REST API on its own schedule instead.
+`workflow_dispatch` has fired instantly and reliably every time it's been
+tested manually, unlike `schedule`.
+
+## Why Arcade / Chhakkadi / Zyvora aren't checked from here
+
+These three are deliberately absent from `services.yml` (see the comment
+block there). All three are proxied through Cloudflare (orange-cloud DNS
+records pointing at Render), unlike WatchTower, which is DNS-only and never
+touches Cloudflare at all. Cloudflare's **Bot Fight Mode** challenges traffic
+from GitHub Actions' runner IPs (Microsoft Azure ASN) before a WAF custom
+rule ever gets a chance to run — confirmed directly via Cloudflare's
+Security Events log, which showed `Service: Bot fight mode, Action taken:
+Managed Challenge` for our request, versus `Service: Custom rules, Action
+taken: Skip` for an identical request from cron-job.org (Hetzner ASN, which
+Cloudflare doesn't challenge as aggressively). On the Free plan, Bot Fight
+Mode can't be selectively bypassed per-path — only Super Bot Fight Mode
+(a paid feature) supports real allowlisting for challenged traffic.
+
+Rather than disable Bot Fight Mode zone-wide, these three are monitored
+directly via **cron-job.org** instead, since its traffic is proven to pass
+cleanly. Point cron-job.org's own failure notifications at the same
+`ALERT_EMAIL_TO` address used by this workflow's Mailgun alerts, so
+everything still lands in one inbox even though the checks run in two
+different places.
 
 ## Dashboard
 

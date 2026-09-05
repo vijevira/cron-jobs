@@ -33,17 +33,16 @@ services:
     body:
       ping: true
   
-  - name: Arcade server health check
-    url: https://api.arcade.endra.in/health
-    timeout: 60
-
-  - name: Chhakkadi health check
-    url: https://api.chhakkadi.endra.in/health
-    timeout: 30
-
-  - name: Zyvora health check
-    url: https://api.zyvora.endra.in/health
-    timeout: 30
+  # Arcade / Chhakkadi / Zyvora are intentionally NOT checked here.
+  # They're all Cloudflare-proxied (unlike WatchTower, which is DNS-only /
+  # unproxied), and Cloudflare's Bot Fight Mode challenges GitHub Actions'
+  # runner traffic (Microsoft Azure ASN) before our WAF Skip rule ever gets
+  # a chance to run — Free-plan Bot Fight Mode can't be selectively bypassed
+  # per-path. cron-job.org's traffic (Hetzner ASN) isn't challenged the same
+  # way, so these three are monitored directly via cron-job.org instead.
+  # Point cron-job.org's failure notifications at the same alert address
+  # used here (ALERT_EMAIL_TO) to keep alerting in one inbox even though the
+  # checks themselves run in two places.
 
   # POST endpoint with a bearer token from a repo secret:
   # - name: Internal Admin API

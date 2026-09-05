@@ -1,27 +1,12 @@
 {
-  "Arcade server health check": {
-    "detail": "expected 2xx, got HTTP 403",
-    "last_checked": "2026-09-05T06:06:57Z",
-    "status": "down"
-  },
-  "Chhakkadi health check": {
-    "detail": "expected 2xx, got HTTP 403",
-    "last_checked": "2026-09-05T06:06:58Z",
-    "status": "down"
-  },
   "WatchTower Health Check API": {
     "detail": "HTTP 200",
-    "last_checked": "2026-09-05T06:06:55Z",
+    "last_checked": "2026-09-05T01:23:38Z",
     "status": "up"
   },
   "Watchtower worker": {
     "detail": "HTTP 202",
-    "last_checked": "2026-09-05T06:06:57Z",
+    "last_checked": "2026-09-05T01:23:39Z",
     "status": "up"
-  },
-  "Zyvora health check": {
-    "detail": "expected 2xx, got HTTP 403",
-    "last_checked": "2026-09-05T06:06:58Z",
-    "status": "down"
   }
 }
