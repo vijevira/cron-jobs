@@ -1,12 +1,12 @@
 {
   "WatchTower Health Check API": {
-    "detail": "expected 2xx, got HTTP 504",
-    "last_checked": "2026-09-06T04:27:02Z",
-    "status": "down"
+    "detail": "HTTP 200",
+    "last_checked": "2026-09-06T08:49:49Z",
+    "status": "up"
   },
   "Watchtower worker": {
-    "detail": "expected 2xx, got HTTP 504",
-    "last_checked": "2026-09-06T04:27:27Z",
-    "status": "down"
+    "detail": "HTTP 202",
+    "last_checked": "2026-09-06T08:49:51Z",
+    "status": "up"
   }
 }
