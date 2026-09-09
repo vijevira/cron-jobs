@@ -20,7 +20,7 @@ services:
   #   expected_status: 200
   #   timeout: 10
 
-  - name: WatchTower Health Check API
+  - name: WatchTower Health Check
     url: https://api.watchtower.endra.in/health
     timeout: 60
 
@@ -32,6 +32,10 @@ services:
       x-worker-secret: "${WATCHTOWER_WORKER_SECRET}"
     body:
       ping: true
+
+  - name: BlindShare Health Check
+    url: https://api.blindshare.in/health
+    timeout: 60
   
   # Arcade / Chhakkadi / Zyvora are intentionally NOT checked here.
   # They're all Cloudflare-proxied (unlike WatchTower, which is DNS-only /
