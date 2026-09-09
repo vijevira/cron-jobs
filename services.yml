@@ -36,6 +36,10 @@ services:
   - name: BlindShare Health Check
     url: https://api.blindshare.in/health
     timeout: 60
+
+  - name: BlindShare Health Check
+    url: https://api-party.blindshare.in/health
+    timeout: 60
   
   # Arcade / Chhakkadi / Zyvora are intentionally NOT checked here.
   # They're all Cloudflare-proxied (unlike WatchTower, which is DNS-only /
