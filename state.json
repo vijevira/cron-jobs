@@ -1,17 +1,17 @@
 {
   "BlindShare Health Check": {
     "detail": "HTTP 200",
-    "last_checked": "2026-09-13T01:13:17Z",
+    "last_checked": "2026-09-13T06:12:43Z",
     "status": "up"
   },
   "WatchTower Health Check": {
-    "detail": "HTTP 200",
-    "last_checked": "2026-09-13T01:13:07Z",
-    "status": "up"
+    "detail": "HTTPSConnectionPool(host='api.watchtower.endra.in', port=443): Max retries exceeded with url: /health (Caused by NewConnectionError(\"HTTPSConnection(host='api.watchtower.endra.in', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+    "last_checked": "2026-09-13T06:11:29Z",
+    "status": "down"
   },
   "Watchtower worker": {
-    "detail": "HTTP 202",
-    "last_checked": "2026-09-13T01:13:08Z",
-    "status": "up"
+    "detail": "HTTPSConnectionPool(host='api.watchtower.endra.in', port=443): Max retries exceeded with url: /api/worker/run (Caused by NewConnectionError(\"HTTPSConnection(host='api.watchtower.endra.in', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+    "last_checked": "2026-09-13T06:12:29Z",
+    "status": "down"
   }
 }
