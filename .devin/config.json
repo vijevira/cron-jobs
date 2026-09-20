@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(secrets/**)",
+      "Read(private/**)",
+      "Read(**/.ssh/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/credentials.json)",
+      "Read(**/startup)",
+      "Read(**/ApsonaServer/**)",
+      "Read(token-firebase/**)",
+      "Write(secrets/**)",
+      "Write(private/**)",
+      "Write(**/.ssh/**)",
+      "Write(**/*.pem)",
+      "Write(**/*.key)",
+      "Write(**/.env)",
+      "Write(**/.env.*)",
+      "Write(**/credentials.json)",
+      "Write(**/startup)",
+      "Write(**/ApsonaServer/**)",
+      "Write(token-firebase/**)"
+    ]
+  }
+}
