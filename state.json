@@ -1,17 +1,17 @@
 {
   "BlindShare Health Check": {
     "detail": "HTTP 200",
-    "last_checked": "2026-09-22T22:04:15Z",
+    "last_checked": "2026-09-23T00:21:31Z",
     "status": "up"
   },
   "WatchTower Health Check": {
     "detail": "HTTP 200",
-    "last_checked": "2026-09-22T22:04:07Z",
+    "last_checked": "2026-09-23T00:21:26Z",
     "status": "up"
   },
   "Watchtower worker": {
-    "detail": "HTTP 202",
-    "last_checked": "2026-09-22T22:04:08Z",
-    "status": "up"
+    "detail": "expected 2xx, got HTTP 409",
+    "last_checked": "2026-09-23T00:21:27Z",
+    "status": "down"
   }
 }
